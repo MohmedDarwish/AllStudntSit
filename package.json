@@ -1,0 +1,79 @@
+{
+  "name": "zoho-creator-student-widget",
+  "version": "1.0.0",
+  "description": "Advanced student search and management widget for Zoho Creator applications with real-time filtering and role-based access control",
+  "main": "app/widget.html",
+  "scripts": {
+    "validate": "zet validate",
+    "pack": "zet pack",
+    "run": "zet run",
+    "test": "echo \"Widget testing requires Zoho Creator environment\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MohmedDarwish/AllStudntSit.git"
+  },
+  "keywords": [
+    "zoho",
+    "creator",
+    "widget",
+    "student",
+    "management",
+    "search",
+    "education",
+    "directory",
+    "filtering",
+    "dashboard"
+  ],
+  "author": {
+    "name": "Mohamed Darwish",
+    "email": "mohamed.darwish@example.com",
+    "url": "https://github.com/MohmedDarwish"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MohmedDarwish/AllStudntSit/issues"
+  },
+  "homepage": "https://github.com/MohmedDarwish/AllStudntSit#readme",
+  "engines": {
+    "node": ">=7.1.0",
+    "npm": ">=3.0.0"
+  },
+  "devDependencies": {
+    "zet": "^1.0.0"
+  },
+  "zohoWidget": {
+    "type": "creator",
+    "category": "productivity",
+    "compatibility": {
+      "creator": ">=5.0.0"
+    },
+    "features": [
+      "real-time-search",
+      "advanced-filtering",
+      "role-based-access",
+      "mobile-responsive",
+      "statistics-dashboard"
+    ]
+  },
+  "files": [
+    "app/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/MohmedDarwish"
+  },
+  "config": {
+    "widget": {
+      "name": "Student Search Widget",
+      "version": "1.0.0",
+      "build": "production"
+    }
+  }
+}
