@@ -1,0 +1,175 @@
+{
+  "appName": "Student Search Widget",
+  "appVersion": "1.0.0",
+  "appDescription": "Advanced student search and management widget for Zoho Creator applications",
+  "developer": {
+    "name": "Mohamed Darwish",
+    "email": "support@studentwidget.com",
+    "website": "https://github.com/MohmedDarwish/AllStudntSit"
+  },
+  "locale": ["en", "ar"],
+  "icon": "https://cdn-icons-png.flaticon.com/512/201/201614.png",
+  "categories": ["productivity", "education"],
+  "permissions": {
+    "data": ["read", "write"],
+    "network": ["external"]
+  },
+  "configuration": [
+    {
+      "label": "Data Source",
+      "name": "dataSource",
+      "type": "form",
+      "mandatory": true,
+      "helpText": "Select the form that contains student data"
+    },
+    {
+      "label": "Name Field",
+      "name": "nameField",
+      "type": "field",
+      "mandatory": true,
+      "helpText": "Field containing student full name"
+    },
+    {
+      "label": "Email Field",
+      "name": "emailField",
+      "type": "field",
+      "mandatory": true,
+      "helpText": "Field containing student email"
+    },
+    {
+      "label": "Mobile Field",
+      "name": "mobileField",
+      "type": "field",
+      "mandatory": false,
+      "helpText": "Field containing student mobile number"
+    },
+    {
+      "label": "Gender Field",
+      "name": "genderField",
+      "type": "field",
+      "mandatory": false,
+      "helpText": "Field containing student gender"
+    },
+    {
+      "label": "Nationality Field",
+      "name": "nationalityField",
+      "type": "field",
+      "mandatory": false,
+      "helpText": "Field containing student nationality"
+    },
+    {
+      "label": "Passport Field",
+      "name": "passportField",
+      "type": "field",
+      "mandatory": false,
+      "helpText": "Field containing passport number"
+    },
+    {
+      "label": "Photo Field",
+      "name": "photoField",
+      "type": "field",
+      "mandatory": false,
+      "helpText": "Field containing student photo"
+    },
+    {
+      "label": "Student Owner Field",
+      "name": "ownerField",
+      "type": "field",
+      "mandatory": false,
+      "helpText": "Field containing student owner/agent"
+    },
+    {
+      "label": "Transfer Student Field",
+      "name": "transferField",
+      "type": "field",
+      "mandatory": false,
+      "helpText": "Field indicating if student is transfer student"
+    },
+    {
+      "label": "Records Per Page",
+      "name": "recordsPerPage",
+      "type": "number",
+      "mandatory": false,
+      "defaultValue": 20,
+      "helpText": "Number of records to display per page (default: 20)"
+    },
+    {
+      "label": "Enable Filters",
+      "name": "enableFilters",
+      "type": "boolean",
+      "mandatory": false,
+      "defaultValue": true,
+      "helpText": "Show filter options (Gender, Passport, Transfer)"
+    },
+    {
+      "label": "Show Statistics",
+      "name": "showStats",
+      "type": "boolean", 
+      "mandatory": false,
+      "defaultValue": true,
+      "helpText": "Display student statistics cards"
+    },
+    {
+      "label": "Allow Role-Based Access",
+      "name": "roleBasedAccess",
+      "type": "boolean",
+      "mandatory": false,
+      "defaultValue": false,
+      "helpText": "Restrict access based on user role (agents see only their students)"
+    },
+    {
+      "label": "Student Detail Page",
+      "name": "detailPage",
+      "type": "string",
+      "mandatory": false,
+      "helpText": "Name of the page to view student details (e.g., Student_Page)"
+    },
+    {
+      "label": "Student Edit Page",
+      "name": "editPage",
+      "type": "string",
+      "mandatory": false,
+      "helpText": "Name of the page to edit student details (e.g., Edit_Student_Page)"
+    }
+  ],
+  "widgetCompatibility": {
+    "pages": true,
+    "reports": true,
+    "forms": false,
+    "dashboard": true
+  },
+  "supportedComponents": [
+    "application",
+    "page",
+    "report"
+  ],
+  "minCreatorVersion": "5.0",
+  "tags": ["student", "search", "education", "management", "directory"],
+  "screenshots": [
+    "https://raw.githubusercontent.com/MohmedDarwish/AllStudntSit/main/screenshots/widget-main.png",
+    "https://raw.githubusercontent.com/MohmedDarwish/AllStudntSit/main/screenshots/widget-search.png"
+  ],
+  "documentation": {
+    "userGuide": "https://github.com/MohmedDarwish/AllStudntSit/blob/main/README.md",
+    "installation": "https://github.com/MohmedDarwish/AllStudntSit/blob/main/INSTALLATION.md",
+    "apiReference": "https://github.com/MohmedDarwish/AllStudntSit/blob/main/API.md"
+  },
+  "support": {
+    "email": "support@studentwidget.com",
+    "documentation": "https://github.com/MohmedDarwish/AllStudntSit/issues",
+    "community": "https://github.com/MohmedDarwish/AllStudntSit/discussions"
+  },
+  "changelog": {
+    "1.0.0": {
+      "date": "2025-01-16",
+      "changes": [
+        "Initial release",
+        "Dynamic student search functionality",
+        "Advanced filtering options",
+        "Real-time statistics",
+        "Role-based access control",
+        "Mobile responsive design"
+      ]
+    }
+  }
+}
