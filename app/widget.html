@@ -401,6 +401,16 @@
             opacity: 0.5;
         }
         
+        /* Debug Info */
+        .debug-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            border-left: 4px solid #007bff;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .widget-header h1 {
@@ -446,6 +456,12 @@
 
         <!-- Search Section -->
         <div class="search-section">
+            <!-- Debug Info -->
+            <div class="debug-info" id="debugInfo" style="display: none;">
+                <strong>Debug Information:</strong><br>
+                <span id="debugContent"></span>
+            </div>
+
             <!-- Search Input -->
             <div class="search-container">
                 <input type="text" id="searchInput" class="search-input" placeholder="Search students by name..." autocomplete="off">
@@ -527,114 +543,60 @@
         // Initialize variables
         let allStudents = [];
         let filteredStudents = [];
-        let currentUser = null;
-        let userRole = null;
+        let debugMode = true; // Set to false in production
 
         // Initialize widget
         window.addEventListener('DOMContentLoaded', function() {
             initializeWidget();
         });
 
-        async function initializeWidget() {
-            try {
-                console.log('Starting widget initialization...');
-                showLoading(true);
-                
-                // Initialize Zoho embedded app
-                if (typeof ZOHO !== 'undefined' && ZOHO.embeddedApp) {
-                    console.log('Initializing ZOHO embeddedApp...');
-                    await ZOHO.embeddedApp.init();
-                    console.log('ZOHO embeddedApp initialized successfully');
-                } else {
-                    console.warn('ZOHO SDK not available');
+        function debugLog(message, data = null) {
+            if (debugMode) {
+                console.log(message, data);
+                const debugElement = document.getElementById('debugContent');
+                if (debugElement) {
+                    debugElement.innerHTML += `${new Date().toLocaleTimeString()}: ${message}<br>`;
+                    document.getElementById('debugInfo').style.display = 'block';
                 }
-                
-                // Load students data
-                await loadStudents();
-                
-                // Setup event listeners
-                setupEventListeners();
-                
-                showLoading(false);
-                console.log('Widget initialization completed');
-                
-            } catch (error) {
-                console.error('Error initializing widget:', error);
-                showError('Failed to initialize widget. Error: ' + error.message);
-                showLoading(false);
             }
         }
 
-        async function loadStudents() {
+        async function initializeWidget() {
             try {
-                console.log('Loading students data...');
+                debugLog('Starting widget initialization...');
+                showLoading(true);
                 
-                // Try multiple approaches to get data from Zoho Creator
+                // Check if ZOHO object exists
                 if (typeof ZOHO !== 'undefined') {
+                    debugLog('ZOHO object found, attempting to initialize Creator SDK...');
                     
-                    // Approach 1: Try ZOHO.CREATOR.API
-                    if (ZOHO.CREATOR && ZOHO.CREATOR.API) {
-                        console.log('Trying ZOHO.CREATOR.API.getAllRecords...');
-                        try {
-                            const reportData = await ZOHO.CREATOR.API.getAllRecords({
-                                appLinkName: "darwish-v3",
-                                reportLinkName: "All_Students",
-                                criteria: ""
-                            });
-                            
-                            console.log('API Response:', reportData);
-                            
-                            if (reportData && reportData.data && reportData.data.length > 0) {
-                                allStudents = mapStudentData(reportData.data);
-                                console.log('Successfully loaded', allStudents.length, 'students');
-                            }
-                        } catch (apiError) {
-                            console.error('CREATOR.API error:', apiError);
-                        }
-                    }
+                    // Initialize ZOHO.CREATOR first
+                    await ZOHO.CREATOR.init();
+                    debugLog('ZOHO.CREATOR.init() completed successfully');
                     
-                    // Approach 2: Try direct widget API if available
-                    if (allStudents.length === 0 && ZOHO.embeddedApp) {
-                        console.log('Trying embeddedApp approach...');
-                        try {
-                            // Get current page info
-                            const pageInfo = await ZOHO.embeddedApp.getPageInfo();
-                            console.log('Page info:', pageInfo);
-                            
-                            // Try to get data using different method
-                            const widgetData = await ZOHO.embeddedApp.invoke('DATA_API', {
-                                method: 'GET_RECORDS',
-                                formName: 'Student_Form'
-                            });
-                            
-                            console.log('Widget data response:', widgetData);
-                            
-                            if (widgetData && widgetData.data) {
-                                allStudents = mapStudentData(widgetData.data);
-                                console.log('Successfully loaded', allStudents.length, 'students via embeddedApp');
-                            }
-                        } catch (embeddedError) {
-                            console.error('embeddedApp error:', embeddedError);
-                        }
-                    }
-                }
-                
-                // Fallback to sample data if no real data loaded
-                if (allStudents.length === 0) {
-                    console.log('No real data loaded, using sample data...');
+                    // Load students data
+                    await loadStudents();
+                } else {
+                    debugLog('ZOHO object not found, using sample data');
                     allStudents = generateSampleData();
+                    filteredStudents = [...allStudents];
+                    updateStats();
+                    renderStudents();
                 }
                 
-                console.log('Final students count:', allStudents.length);
-                filteredStudents = [...allStudents];
-                updateStats();
-                renderStudents();
+                // Setup event listeners
+                setupEventListeners();
+                showLoading(false);
+                
+                debugLog('Widget initialization completed successfully');
                 
             } catch (error) {
-                console.error('Error loading students:', error);
+                debugLog('Error initializing widget: ' + error.message);
+                console.error('Error initializing widget:', error);
+                showError('Failed to initialize widget. Error: ' + error.message);
+                showLoading(false);
                 
-                // Final fallback to sample data
-                console.log('Error occurred, falling back to sample data...');
+                // Fallback to sample data
                 allStudents = generateSampleData();
                 filteredStudents = [...allStudents];
                 updateStats();
@@ -642,25 +604,87 @@
             }
         }
 
-        function mapStudentData(rawData) {
-            return rawData.map(student => ({
-                id: student.ID || student.id,
-                fullName: student.Full_Name || student.Name || student.full_name || '',
-                email: student.Email || student.email || '',
-                mobile: student.Mobile || student.mobile || student.phone || '',
-                gender: student.Gender || student.gender || '',
-                nationality: { 
-                    country: student.Nationality || student.nationality || student.Country || '' 
-                },
-                passportNo: student.Passport_No || student.passport_no || student.passport || '',
-                transferStudent: student.Transfer_student || student.transfer_student || 'No',
-                studentOwner: student.Student_Owner || student.student_owner || student.owner || '',
-                photo: student.Photo || student.photo || null
-            }));
+        async function loadStudents() {
+            try {
+                debugLog('Starting to load students from Zoho Creator...');
+                
+                // Create config object as per official documentation  
+                var config = {
+                    appName: "darwish-v3",
+                    reportName: "All_Students",
+                    page: 1,
+                    pageSize: 200
+                };
+                
+                debugLog('Config object created', config);
+                
+                // Call getAllRecords with proper syntax
+                ZOHO.CREATOR.API.getAllRecords(config)
+                .then(function(response) {
+                    debugLog('API Response received', response);
+                    
+                    if (response && response.data && Array.isArray(response.data)) {
+                        debugLog(`Found ${response.data.length} records`);
+                        
+                        // Map the data to our format
+                        allStudents = response.data.map(student => {
+                            return {
+                                id: student.ID || student.id || Math.random(),
+                                fullName: student.Full_Name || student.Name || 'Unknown Name',
+                                email: student.Email || student.email || '',
+                                mobile: student.Mobile || student.mobile || '',
+                                gender: student.Gender || student.gender || '',
+                                nationality: { 
+                                    country: student.Nationality || student.nationality || student.Country || '' 
+                                },
+                                passportNo: student.Passport_No || student.passport_no || '',
+                                transferStudent: student.Transfer_student || student.transfer_student || 'No',
+                                studentOwner: student.Student_Owner || student.student_owner || '',
+                                photo: student.Photo || student.photo || null
+                            };
+                        });
+                        
+                        debugLog(`Successfully mapped ${allStudents.length} students`);
+                        
+                    } else {
+                        debugLog('No valid data found in API response, using sample data');
+                        allStudents = generateSampleData();
+                    }
+                    
+                    filteredStudents = [...allStudents];
+                    updateStats();
+                    renderStudents();
+                    showLoading(false);
+                })
+                .catch(function(error) {
+                    debugLog('API Error: ' + error.message);
+                    console.error('API Error:', error);
+                    
+                    // Fallback to sample data
+                    debugLog('API failed, falling back to sample data...');
+                    allStudents = generateSampleData();
+                    filteredStudents = [...allStudents];
+                    updateStats();
+                    renderStudents();
+                    showLoading(false);
+                });
+                
+            } catch (error) {
+                debugLog('Error in loadStudents: ' + error.message);
+                console.error('Error loading students:', error);
+                
+                // Fallback to sample data
+                debugLog('Exception occurred, falling back to sample data...');
+                allStudents = generateSampleData();
+                filteredStudents = [...allStudents];
+                updateStats();
+                renderStudents();
+                showLoading(false);
+            }
         }
 
         function generateSampleData() {
-            // Sample data for demonstration
+            // Sample data for demonstration when API is not available
             return [
                 {
                     id: 1,
@@ -856,56 +880,19 @@
         }
 
         function viewStudent(studentId) {
-            console.log('Viewing student:', studentId);
-            
-            if (typeof ZOHO !== 'undefined' && ZOHO.embeddedApp) {
-                try {
-                    // Navigate to student details page in Zoho Creator
-                    ZOHO.embeddedApp.invoke('NAVIGATE', {
-                        page: 'Student_Page',
-                        params: { student_id: studentId }
-                    });
-                } catch (navError) {
-                    console.error('Navigation error:', navError);
-                    // Fallback alert for testing
-                    alert(`View student ID: ${studentId}`);
-                }
-            } else {
-                // Fallback for testing
-                alert(`View student ID: ${studentId}`);
-            }
+            debugLog(`Attempting to view student: ${studentId}`);
+            alert(`View student ID: ${studentId}`);
         }
 
         function editStudent(studentId) {
-            console.log('Editing student:', studentId);
-            
-            if (typeof ZOHO !== 'undefined' && ZOHO.embeddedApp) {
-                try {
-                    // Navigate to edit student page in Zoho Creator
-                    ZOHO.embeddedApp.invoke('NAVIGATE', {
-                        page: 'Edit_Student_Page',
-                        params: { student_id: studentId }
-                    });
-                } catch (navError) {
-                    console.error('Navigation error:', navError);
-                    // Fallback alert for testing
-                    alert(`Edit student ID: ${studentId}`);
-                }
-            } else {
-                // Fallback for testing
-                alert(`Edit student ID: ${studentId}`);
-            }
+            debugLog(`Attempting to edit student: ${studentId}`);
+            alert(`Edit student ID: ${studentId}`);
         }
 
         function showLoading(show) {
             const loadingState = document.getElementById('loadingState');
-            
             if (loadingState) {
-                if (show) {
-                    loadingState.style.display = 'block';
-                } else {
-                    loadingState.style.display = 'none';
-                }
+                loadingState.style.display = show ? 'block' : 'none';
             }
         }
 
@@ -920,41 +907,6 @@
                     </div>
                 `;
             }
-        }
-
-        // Mock ZOHO object for development/testing
-        if (typeof ZOHO === 'undefined') {
-            console.log('ZOHO SDK not found, creating mock object for testing');
-            window.ZOHO = {
-                embeddedApp: {
-                    init: () => {
-                        console.log('Mock ZOHO.embeddedApp.init called');
-                        return Promise.resolve();
-                    },
-                    getPageInfo: () => {
-                        console.log('Mock ZOHO.embeddedApp.getPageInfo called');
-                        return Promise.resolve({ appName: "darwish-v3", pageName: "test" });
-                    },
-                    invoke: (action, params) => {
-                        console.log('Mock ZOHO.embeddedApp.invoke called:', action, params);
-                        if (action === 'NAVIGATE') {
-                            alert(`Navigate to ${params.page} with params: ${JSON.stringify(params.params)}`);
-                        }
-                        return Promise.resolve({});
-                    }
-                },
-                CREATOR: {
-                    API: {
-                        getAllRecords: (params) => {
-                            console.log('Mock ZOHO.CREATOR.API.getAllRecords called:', params);
-                            return Promise.resolve({ 
-                                data: [],
-                                status: 'success'
-                            });
-                        }
-                    }
-                }
-            };
         }
     </script>
 </body>
